@@ -8,7 +8,15 @@ TraductorVoz is a small Swing application that uses the Microsoft Speech SDK to 
 - An **Azure Speech resource** with a subscription key and region.
 - A microphone configured on your system.
 
-Update `SpeechConfigProvider` with your subscription information before running.
+Before running, set the following environment variables with your Azure Speech
+resource credentials:
+
+```bash
+export AZURE_SPEECH_KEY=<your-key>
+export AZURE_SPEECH_REGION=<your-region>
+```
+
+`SpeechConfigProvider` reads these variables when creating the SDK configuration.
 
 ## Building and Running
 
