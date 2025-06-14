@@ -20,7 +20,7 @@ public class SpeechTranslatorService {
      
 
         try {
-            SpeechTranslationConfig config = SpeechConfigProvider.getConfig();
+            SpeechTranslationConfig config = SpeechConfigProvider.getConfig(targetLanguage);
             recognizer = new TranslationRecognizer(config);
 
             recognizer.recognized.addEventListener((s, e) -> {

@@ -43,6 +43,14 @@ Example writing subtitles to `/tmp/subs.txt`:
 java -Dsubtitle.file=/tmp/subs.txt -jar target/TraductorVoz-0.0.1-SNAPSHOT.jar
 ```
 
+You can change the translation target language by passing it as the first
+command‑line argument or via the `target.language` system property. The default
+target language is `en` (English). For example, to translate into French:
+
+```bash
+java -Dtarget.language=fr -jar target/TraductorVoz-0.0.1-SNAPSHOT.jar
+```
+
 ## Launching the UI
 
 When the application starts, translation begins asynchronously so that the window appears immediately without blocking the Swing event thread. The `Main` class spawns a `SwingWorker` that calls `startTranslation()` in the background.
