@@ -16,4 +16,10 @@
     </dependency>
   </dependencies>
 
+  <repositories>
+    <repository>
+      <id>maven.microsoft.com</id>
+      <url>https://azureai.azureedge.net/maven/</url>
+    </repository>
+  </repositories>
 </project>
