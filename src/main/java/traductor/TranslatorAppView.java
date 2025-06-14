@@ -7,15 +7,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+// Writes the displayed subtitle text to a configurable file.
+import traductor.SubtitleFileWriter;
+
+/**
+ * Swing based view that shows the translated text as subtitles.
+ */
+
 public class TranslatorAppView extends JFrame implements TranslationListener {
 	private final JLabel translatedLabel = new JLabel("", SwingConstants.CENTER);
 	private final SpeechTranslatorService translatorService;
 	private final TranslucentPanel bgPanel;
 	private Timer flushTimer, clearTimer, fadeOutTimer, fadeInTimer, bufferTimer;
-	private float opacity = 0.0f;
+        private float opacity = 0.0f;
 
-	private final Queue<String> bufferQueue = new LinkedList<>();
-	private boolean isDisplayingBuffer = false;
+        private final Queue<String> bufferQueue = new LinkedList<>();
+        private boolean isDisplayingBuffer = false;
+
+        // Responsible for outputting the displayed subtitles to a text file.
+        private final SubtitleFileWriter subtitleWriter = new SubtitleFileWriter();
 
 	private static final long serialVersionUID = 1L;
 	private static final int CLEAR_MILLIS = 6000;
@@ -135,6 +145,14 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
                         List<String> blocks = splitTextIntoBlocks(translated.trim());
                         bufferQueue.addAll(blocks);
 
+                        // Write the text that will be displayed to the subtitle file
+                        StringBuilder plain = new StringBuilder();
+                        for (String b : blocks) {
+                                if (plain.length() > 0) plain.append(System.lineSeparator());
+                                plain.append(b.replace("<br>", System.lineSeparator()));
+                        }
+                        subtitleWriter.write(plain.toString());
+
                         if (!isDisplayingBuffer) {
                                 displayNextBlockFromQueue();
                         }
@@ -177,8 +195,10 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 		}
 		isDisplayingBuffer = true;
 
-		String htmlText = formatAsHtmlLines(bufferQueue.poll());
-		translatedLabel.setText(htmlText);
+                String block = bufferQueue.poll();
+                String htmlText = formatAsHtmlLines(block);
+                translatedLabel.setText(htmlText);
+                subtitleWriter.write(block.replace("<br>", System.lineSeparator()));
 		
 		SwingUtilities.invokeLater(() -> {
 			Dimension preferredSize = translatedLabel.getPreferredSize();
