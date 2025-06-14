@@ -63,3 +63,7 @@ You can display the subtitles in OBS in two ways:
 2. **Text from file** – add a *Text* source with *Read from file* enabled and point it to the subtitle file defined by `subtitle.file`.
 
 Either approach lets you overlay the live translation in your stream.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
