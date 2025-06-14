@@ -1,3 +1,10 @@
 # Project exclude paths
 /target
 TraductorVoz/
+# IDE and editor files
+.idea/
+.classpath
+.project
+.settings/
+.vscode/
+.DS_Store
