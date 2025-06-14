@@ -50,10 +50,8 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 		bgPanel.setLayout(new BorderLayout());
 		bgPanel.add(translatedLabel, BorderLayout.CENTER);
 
-		setContentPane(bgPanel);
-		getRootPane().setOpaque(false);
-
-		translatorService.startTranslation();
+                setContentPane(bgPanel);
+                getRootPane().setOpaque(false);
 	}
 
 	private void restartClearTimer() {
@@ -129,17 +127,19 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 	@Override
 	public void onPartialResult(String original, String translated) {}
 
-	@Override
-	public void onFinalResult(String original, String translated) {
-		if (translated == null || translated.trim().isEmpty()) return;
+        @Override
+        public void onFinalResult(String original, String translated) {
+                SwingUtilities.invokeLater(() -> {
+                        if (translated == null || translated.trim().isEmpty()) return;
 
-		List<String> blocks = splitTextIntoBlocks(translated.trim());
-		bufferQueue.addAll(blocks);
+                        List<String> blocks = splitTextIntoBlocks(translated.trim());
+                        bufferQueue.addAll(blocks);
 
-		if (!isDisplayingBuffer) {
-			displayNextBlockFromQueue();
-		}
-	}
+                        if (!isDisplayingBuffer) {
+                                displayNextBlockFromQueue();
+                        }
+                });
+        }
 
 
 	private List<String> splitTextIntoBlocks(String fullText) {
@@ -201,25 +201,29 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 		bufferTimer.start();
 	}
 
-	@Override
-	public void onError(String message) {
-		translatedLabel.setText("Error: " + message);
-		cancelFadeAnimations();
-		if (flushTimer != null) flushTimer.stop();
-		if (clearTimer != null) clearTimer.stop();
-		if (bufferTimer != null) bufferTimer.stop();
-	}
+        @Override
+        public void onError(String message) {
+                SwingUtilities.invokeLater(() -> {
+                        translatedLabel.setText("Error: " + message);
+                        cancelFadeAnimations();
+                        if (flushTimer != null) flushTimer.stop();
+                        if (clearTimer != null) clearTimer.stop();
+                        if (bufferTimer != null) bufferTimer.stop();
+                });
+        }
 
-	@Override
-	public void onSessionStopped() {
-		cancelFadeAnimations();
-		if (flushTimer != null) flushTimer.stop();
-		if (clearTimer != null) clearTimer.stop();
-		if (bufferTimer != null) bufferTimer.stop();
-		translatedLabel.setText("");
-		bufferQueue.clear();
-		isDisplayingBuffer = false;
-	}
+        @Override
+        public void onSessionStopped() {
+                SwingUtilities.invokeLater(() -> {
+                        cancelFadeAnimations();
+                        if (flushTimer != null) flushTimer.stop();
+                        if (clearTimer != null) clearTimer.stop();
+                        if (bufferTimer != null) bufferTimer.stop();
+                        translatedLabel.setText("");
+                        bufferQueue.clear();
+                        isDisplayingBuffer = false;
+                });
+        }
 
 	static class TranslucentPanel extends JPanel {
 		private static final long serialVersionUID = 1L;
