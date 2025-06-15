@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility for writing subtitle text to a file so it can be
@@ -17,6 +19,7 @@ import java.nio.file.StandardOpenOption;
  * </ul>
  */
 public class SubtitleFileWriter {
+    private static final Logger LOGGER = Logger.getLogger(SubtitleFileWriter.class.getName());
     private final Path filePath;
     private final boolean append;
 
@@ -52,7 +55,7 @@ public class SubtitleFileWriter {
                                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (IOException e) {
-            System.err.println("Failed to write subtitle file: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Failed to write subtitle file", e);
         }
     }
 }

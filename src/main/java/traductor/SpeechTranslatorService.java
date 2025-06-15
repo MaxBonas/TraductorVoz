@@ -2,8 +2,11 @@ package traductor;
 
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.translation.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SpeechTranslatorService {
+    private static final Logger LOGGER = Logger.getLogger(SpeechTranslatorService.class.getName());
     private TranslationRecognizer recognizer;
     private TranslationListener listener;
     private final String targetLanguage;
@@ -28,8 +31,9 @@ public class SpeechTranslatorService {
              
                     String original = e.getResult().getText();
                     String translated = e.getResult().getTranslations().get(targetLanguage);
-                   	System.out.println(translated);
-                   	System.out.println();
+                    if (translated != null) {
+                        LOGGER.info(translated);
+                    }
                     if (translated != null && !translated.trim().isEmpty()) {
                         listener.onFinalResult(original, translated);
                     }
@@ -38,22 +42,23 @@ public class SpeechTranslatorService {
 
             recognizer.canceled.addEventListener((s, e) -> {
                 String details = e.getErrorDetails();
-                System.out.println("Error: " + details);
+                LOGGER.log(Level.SEVERE, "Error: {0}", details);
                 if (listener != null) listener.onError(details);
 
              
             });
 
             recognizer.sessionStopped.addEventListener((s, e) -> {
-            	System.out.println("Sesion terminada");
+                LOGGER.info("Session ended");
                 if (listener != null) listener.onSessionStopped();
             });
 
             recognizer.startContinuousRecognitionAsync().get();
 
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to start translation", e);
             if (listener != null) listener.onError(e.getMessage());
-         
+
         }
     }
 
@@ -65,6 +70,7 @@ public class SpeechTranslatorService {
                 recognizer = null;
             }
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to stop translation", e);
             if (listener != null) listener.onError(e.getMessage());
         }
     }
