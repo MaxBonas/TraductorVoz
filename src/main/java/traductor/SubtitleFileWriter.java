@@ -1,10 +1,9 @@
 package traductor;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,69 +23,75 @@ public class SubtitleFileWriter {
     private final boolean append;
     private boolean enabled = true;
 
-    /**
-     * Creates the writer using system properties or defaults.
-     */
     public SubtitleFileWriter() {
         this(System.getProperty("subtitle.file", "subtitles.txt"),
              Boolean.parseBoolean(System.getProperty("subtitle.append", "false")));
     }
 
-    /**
-     * Creates the writer with the provided configuration.
-     *
-     * @param filePath path to the file
-     * @param append   if true new text will be appended, otherwise the file is overwritten
-     */
     public SubtitleFileWriter(String filePath, boolean append) {
         this.filePath = Paths.get(filePath);
         this.append = append;
 
         Path parent = this.filePath.toAbsolutePath().getParent();
         try {
-            // 1) Aseguramos que exista la carpeta padre
+            // 1) Asegura directorio
             if (parent != null) {
                 Files.createDirectories(parent);
             }
 
-            // 2) Si el directorio padre NO es escribible, desactivamos la salida
-            if (parent != null && !Files.isWritable(parent)) {
-                LOGGER.log(Level.WARNING, "Parent directory not writable: {0}. Disabling file output.", parent);
-                this.enabled = false;
-                return;
+            // 2) Comprueba bits POSIX: owner-write en el directorio
+            if (parent != null) {
+                Set<PosixFilePermission> parentPerms = Files.getPosixFilePermissions(parent);
+                if (!parentPerms.contains(PosixFilePermission.OWNER_WRITE)) {
+                    LOGGER.log(Level.WARNING,
+                        "Parent directory not writable by owner (no OWNER_WRITE bit): {0}. Disabling file output.",
+                        parent);
+                    this.enabled = false;
+                    return;
+                }
             }
 
-            // 3) Si el fichero YA existe y NO es escribible, desactivamos la salida
-            if (Files.exists(this.filePath) && !Files.isWritable(this.filePath)) {
-                LOGGER.log(Level.WARNING, "Subtitle file exists but is not writable: {0}. Disabling file output.", filePath);
-                this.enabled = false;
-                return;
+            // 3) Si el fichero ya existía, comprueba bits POSIX owner-write
+            if (Files.exists(this.filePath)) {
+                Set<PosixFilePermission> filePerms = Files.getPosixFilePermissions(this.filePath);
+                if (!filePerms.contains(PosixFilePermission.OWNER_WRITE)) {
+                    LOGGER.log(Level.WARNING,
+                        "Subtitle file exists but is not owner-writable: {0}. Disabling file output.",
+                        this.filePath);
+                    this.enabled = false;
+                    return;
+                }
             }
 
-            // 4) Intentamos crear el fichero (CREATE + APPEND) para asegurarnos de que funciona
+            // 4) Prueba a crear / abrir el fichero
             Files.newOutputStream(this.filePath, StandardOpenOption.CREATE, StandardOpenOption.APPEND).close();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING,
                 "Unable to write to subtitle file {0}: {1}. Disabling file output.",
                 new Object[]{this.filePath, e.getMessage()});
             this.enabled = false;
+        } catch (UnsupportedOperationException e) {
+            // En sistemas no-POSIX fallback a isWritable
+            if (parent != null && !Files.isWritable(parent)) {
+                this.enabled = false;
+                return;
+            }
+            if (Files.exists(this.filePath) && !Files.isWritable(this.filePath)) {
+                this.enabled = false;
+                return;
+            }
         }
     }
 
-    /**
-     * Writes the given text to the subtitle file.
-     */
     public void write(String text) {
-        if (!enabled) {
-            return;
-        }
+        if (!enabled) return;
         try {
             if (append) {
                 Files.writeString(filePath, text + System.lineSeparator(),
-                                  StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } else {
                 Files.writeString(filePath, text,
-                                  StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to write subtitle file", e);
