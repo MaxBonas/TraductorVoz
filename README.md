@@ -17,8 +17,9 @@ export AZURE_SPEECH_REGION=<your-region>
 ```
 
 Alternatively you can use the `run.sh` script provided in this repository. It
-will ask for the key and region the first time you run it and then launch the
-application with those values set.
+prompts for the key and region the first time and stores them in `.traductor.env`
+so subsequent runs reuse the saved values. Delete or edit this file if your
+credentials change.
 
 `SpeechConfigProvider` reads these variables when creating the SDK configuration.
 
@@ -30,8 +31,8 @@ Compile the project using Maven:
 mvn package
 ```
 
-Run the application using the helper script which will prompt for your
-credentials if they are not already set:
+Run the application using the helper script which stores your credentials in
+`.traductor.env` the first time you run it:
 
 ```bash
 ./run.sh
