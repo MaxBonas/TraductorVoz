@@ -65,7 +65,13 @@ disables subtitle file output instead of failing.
 Example writing subtitles to `/tmp/subs.txt`:
 
 ```bash
-mvn exec:java -Dexec.mainClass=traductor.Main -Dexec.args="-Dsubtitle.file=/tmp/subs.txt"
+mvn exec:java -Dexec.mainClass=traductor.Main -Dsubtitle.file=/tmp/subs.txt
+```
+
+To append to the same file instead of overwriting it:
+
+```bash
+mvn exec:java -Dexec.mainClass=traductor.Main -Dsubtitle.file=/tmp/subs.txt -Dsubtitle.append=true
 ```
 
 You can change the translation target language by passing it as the first
