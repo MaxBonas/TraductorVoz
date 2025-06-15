@@ -20,7 +20,7 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 	private final JLabel translatedLabel = new JLabel("", SwingConstants.CENTER);
 	private final SpeechTranslatorService translatorService;
 	private final TranslucentPanel bgPanel;
-	private Timer flushTimer, clearTimer, fadeOutTimer, fadeInTimer, bufferTimer;
+        private Timer clearTimer, fadeOutTimer, fadeInTimer, bufferTimer;
         private float opacity = 0.0f;
 
         private final Queue<String> bufferQueue = new LinkedList<>();
@@ -227,7 +227,6 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
                 SwingUtilities.invokeLater(() -> {
                         translatedLabel.setText("Error: " + message);
                         cancelFadeAnimations();
-                        if (flushTimer != null) flushTimer.stop();
                         if (clearTimer != null) clearTimer.stop();
                         if (bufferTimer != null) bufferTimer.stop();
                 });
@@ -237,7 +236,6 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
         public void onSessionStopped() {
                 SwingUtilities.invokeLater(() -> {
                         cancelFadeAnimations();
-                        if (flushTimer != null) flushTimer.stop();
                         if (clearTimer != null) clearTimer.stop();
                         if (bufferTimer != null) bufferTimer.stop();
                         translatedLabel.setText("");
