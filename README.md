@@ -47,10 +47,10 @@ Execute unit tests using Maven:
 mvn test
 ```
 
-Launch the UI from the generated JAR:
+Launch the UI using Maven (the `run.sh` script does this automatically):
 
 ```bash
-java -jar target/TraductorVoz-0.0.1-SNAPSHOT.jar
+mvn exec:java -Dexec.mainClass=traductor.Main
 ```
 
 Use the following properties to control subtitle file output:
@@ -64,7 +64,7 @@ disables subtitle file output instead of failing.
 Example writing subtitles to `/tmp/subs.txt`:
 
 ```bash
-java -Dsubtitle.file=/tmp/subs.txt -jar target/TraductorVoz-0.0.1-SNAPSHOT.jar
+mvn exec:java -Dexec.mainClass=traductor.Main -Dexec.args="-Dsubtitle.file=/tmp/subs.txt"
 ```
 
 You can change the translation target language by passing it as the first
@@ -72,7 +72,7 @@ command‑line argument or via the `target.language` system property. The defaul
 target language is `en` (English). For example, to translate into French:
 
 ```bash
-java -Dtarget.language=fr -jar target/TraductorVoz-0.0.1-SNAPSHOT.jar
+mvn exec:java -Dexec.mainClass=traductor.Main -Dexec.args="fr"
 ```
 
 ## Launching the UI

@@ -23,9 +23,11 @@ export AZURE_SPEECH_KEY
 export AZURE_SPEECH_REGION
 
 # Build the project if the JAR doesn't exist
-if [ ! -f target/TraductorVoz-0.0.1-SNAPSHOT.jar ]; then
-  mvn package || { echo "Build failed"; exit 1; }
-fi
+# Compile the project so all classes are up to date
+mvn -q package || { echo "Build failed"; exit 1; }
 
-# Run the application, forwarding any extra args (e.g., target language)
-java -jar target/TraductorVoz-0.0.1-SNAPSHOT.jar "$@"
+# Run the application using Maven so dependencies are on the classpath
+mvn -q exec:java -Dexec.mainClass=traductor.Main -Dexec.args="$*" || {
+  echo "Application failed";
+  exit 1;
+}
