@@ -154,15 +154,6 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 
                         List<String> blocks = splitTextIntoBlocks(translated.trim());
                         bufferQueue.addAll(blocks);
-
-                        // Write the text that will be displayed to the subtitle file
-                        StringBuilder plain = new StringBuilder();
-                        for (String b : blocks) {
-                                if (plain.length() > 0) plain.append(System.lineSeparator());
-                                plain.append(b.replace("<br>", System.lineSeparator()));
-                        }
-                        subtitleWriter.write(plain.toString());
-
                         if (!isDisplayingBuffer) {
                                 displayNextBlockFromQueue();
                         }
