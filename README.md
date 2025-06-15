@@ -38,6 +38,11 @@ Run the application using the helper script which stores your credentials in
 ./run.sh
 ```
 
+If you run the script from a file explorer on Windows, a new console window may
+open and close immediately after execution, hiding any errors. Instead, open a
+terminal (for example *Git Bash*) and launch `./run.sh` from there so the
+output remains visible.
+
 
 ## Running Tests
 

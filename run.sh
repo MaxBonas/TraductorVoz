@@ -31,3 +31,7 @@ mvn -q exec:java -Dexec.mainClass=traductor.Main -Dexec.args="$*" || {
   echo "Application failed";
   exit 1;
 }
+
+# Keep the window open so any error messages remain visible when
+# the script is launched from a graphical shell.
+read -p "Presiona Enter para salir" _
