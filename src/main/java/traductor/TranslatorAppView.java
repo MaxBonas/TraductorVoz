@@ -2,20 +2,32 @@ package traductor;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+// Writes the displayed subtitle text to a configurable file.
+import traductor.SubtitleFileWriter;
+
+/**
+ * Swing based view that shows the translated text as subtitles.
+ */
 
 public class TranslatorAppView extends JFrame implements TranslationListener {
 	private final JLabel translatedLabel = new JLabel("", SwingConstants.CENTER);
 	private final SpeechTranslatorService translatorService;
 	private final TranslucentPanel bgPanel;
 	private Timer flushTimer, clearTimer, fadeOutTimer, fadeInTimer, bufferTimer;
-	private float opacity = 0.0f;
+        private float opacity = 0.0f;
 
-	private final Queue<String> bufferQueue = new LinkedList<>();
-	private boolean isDisplayingBuffer = false;
+        private final Queue<String> bufferQueue = new LinkedList<>();
+        private boolean isDisplayingBuffer = false;
+
+        // Responsible for outputting the displayed subtitles to a text file.
+        private final SubtitleFileWriter subtitleWriter = new SubtitleFileWriter();
 
 	private static final long serialVersionUID = 1L;
 	private static final int CLEAR_MILLIS = 6000;
@@ -50,11 +62,17 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 		bgPanel.setLayout(new BorderLayout());
 		bgPanel.add(translatedLabel, BorderLayout.CENTER);
 
-		setContentPane(bgPanel);
-		getRootPane().setOpaque(false);
+                setContentPane(bgPanel);
+                getRootPane().setOpaque(false);
 
-		translatorService.startTranslation();
-	}
+                setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosing(WindowEvent e) {
+                                translatorService.stopTranslation();
+                        }
+                });
+        }
 
 	private void restartClearTimer() {
 		if (clearTimer != null && clearTimer.isRunning())
@@ -129,17 +147,18 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 	@Override
 	public void onPartialResult(String original, String translated) {}
 
-	@Override
-	public void onFinalResult(String original, String translated) {
-		if (translated == null || translated.trim().isEmpty()) return;
+        @Override
+        public void onFinalResult(String original, String translated) {
+                SwingUtilities.invokeLater(() -> {
+                        if (translated == null || translated.trim().isEmpty()) return;
 
-		List<String> blocks = splitTextIntoBlocks(translated.trim());
-		bufferQueue.addAll(blocks);
-
-		if (!isDisplayingBuffer) {
-			displayNextBlockFromQueue();
-		}
-	}
+                        List<String> blocks = splitTextIntoBlocks(translated.trim());
+                        bufferQueue.addAll(blocks);
+                        if (!isDisplayingBuffer) {
+                                displayNextBlockFromQueue();
+                        }
+                });
+        }
 
 
 	private List<String> splitTextIntoBlocks(String fullText) {
@@ -177,8 +196,10 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 		}
 		isDisplayingBuffer = true;
 
-		String htmlText = formatAsHtmlLines(bufferQueue.poll());
-		translatedLabel.setText(htmlText);
+                String block = bufferQueue.poll();
+                String htmlText = formatAsHtmlLines(block);
+                translatedLabel.setText(htmlText);
+                subtitleWriter.write(block.replace("<br>", System.lineSeparator()));
 		
 		SwingUtilities.invokeLater(() -> {
 			Dimension preferredSize = translatedLabel.getPreferredSize();
@@ -201,25 +222,29 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 		bufferTimer.start();
 	}
 
-	@Override
-	public void onError(String message) {
-		translatedLabel.setText("Error: " + message);
-		cancelFadeAnimations();
-		if (flushTimer != null) flushTimer.stop();
-		if (clearTimer != null) clearTimer.stop();
-		if (bufferTimer != null) bufferTimer.stop();
-	}
+        @Override
+        public void onError(String message) {
+                SwingUtilities.invokeLater(() -> {
+                        translatedLabel.setText("Error: " + message);
+                        cancelFadeAnimations();
+                        if (flushTimer != null) flushTimer.stop();
+                        if (clearTimer != null) clearTimer.stop();
+                        if (bufferTimer != null) bufferTimer.stop();
+                });
+        }
 
-	@Override
-	public void onSessionStopped() {
-		cancelFadeAnimations();
-		if (flushTimer != null) flushTimer.stop();
-		if (clearTimer != null) clearTimer.stop();
-		if (bufferTimer != null) bufferTimer.stop();
-		translatedLabel.setText("");
-		bufferQueue.clear();
-		isDisplayingBuffer = false;
-	}
+        @Override
+        public void onSessionStopped() {
+                SwingUtilities.invokeLater(() -> {
+                        cancelFadeAnimations();
+                        if (flushTimer != null) flushTimer.stop();
+                        if (clearTimer != null) clearTimer.stop();
+                        if (bufferTimer != null) bufferTimer.stop();
+                        translatedLabel.setText("");
+                        bufferQueue.clear();
+                        isDisplayingBuffer = false;
+                });
+        }
 
 	static class TranslucentPanel extends JPanel {
 		private static final long serialVersionUID = 1L;
