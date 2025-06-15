@@ -1,6 +1,8 @@
 # Project exclude paths
 /target
 TraductorVoz/
+# Credentials stored by run.sh
+.traductor.env
 # IDE and editor files
 .idea/
 .classpath
