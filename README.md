@@ -16,6 +16,10 @@ export AZURE_SPEECH_KEY=<your-key>
 export AZURE_SPEECH_REGION=<your-region>
 ```
 
+Alternatively you can use the `run.sh` script provided in this repository. It
+will ask for the key and region the first time you run it and then launch the
+application with those values set.
+
 `SpeechConfigProvider` reads these variables when creating the SDK configuration.
 
 ## Building and Running
@@ -25,6 +29,14 @@ Compile the project using Maven:
 ```bash
 mvn package
 ```
+
+Run the application using the helper script which will prompt for your
+credentials if they are not already set:
+
+```bash
+./run.sh
+```
+
 
 ## Running Tests
 
