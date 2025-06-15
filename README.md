@@ -45,6 +45,9 @@ Use the following properties to control subtitle file output:
 - `subtitle.file` – path to the text file (default: `subtitles.txt`)
 - `subtitle.append` – set to `true` to append, or `false` to overwrite (default)
 
+If the specified path cannot be written, the application logs a warning and
+disables subtitle file output instead of failing.
+
 Example writing subtitles to `/tmp/subs.txt`:
 
 ```bash
