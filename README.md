@@ -26,6 +26,14 @@ Compile the project using Maven:
 mvn package
 ```
 
+## Running Tests
+
+Execute unit tests using Maven:
+
+```bash
+mvn test
+```
+
 Launch the UI from the generated JAR:
 
 ```bash
