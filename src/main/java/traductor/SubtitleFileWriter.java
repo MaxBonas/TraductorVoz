@@ -22,6 +22,7 @@ public class SubtitleFileWriter {
     private static final Logger LOGGER = Logger.getLogger(SubtitleFileWriter.class.getName());
     private final Path filePath;
     private final boolean append;
+    private boolean enabled = true;
 
     /**
      * Creates the writer using system properties or defaults.
@@ -40,12 +41,27 @@ public class SubtitleFileWriter {
     public SubtitleFileWriter(String filePath, boolean append) {
         this.filePath = Paths.get(filePath);
         this.append = append;
+
+        try {
+            Path parent = this.filePath.toAbsolutePath().getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+
+            Files.newOutputStream(this.filePath, StandardOpenOption.CREATE, StandardOpenOption.APPEND).close();
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Unable to write to subtitle file {0}: {1}. Disabling file output.", new Object[]{this.filePath, e.getMessage()});
+            this.enabled = false;
+        }
     }
 
     /**
      * Writes the given text to the subtitle file.
      */
     public void write(String text) {
+        if (!enabled) {
+            return;
+        }
         try {
             if (append) {
                 Files.writeString(filePath, text + System.lineSeparator(),
