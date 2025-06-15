@@ -42,15 +42,33 @@ public class SubtitleFileWriter {
         this.filePath = Paths.get(filePath);
         this.append = append;
 
+        Path parent = this.filePath.toAbsolutePath().getParent();
         try {
-            Path parent = this.filePath.toAbsolutePath().getParent();
+            // 1) Aseguramos que exista la carpeta padre
             if (parent != null) {
                 Files.createDirectories(parent);
             }
 
+            // 2) Si el directorio padre NO es escribible, desactivamos la salida
+            if (parent != null && !Files.isWritable(parent)) {
+                LOGGER.log(Level.WARNING, "Parent directory not writable: {0}. Disabling file output.", parent);
+                this.enabled = false;
+                return;
+            }
+
+            // 3) Si el fichero YA existe y NO es escribible, desactivamos la salida
+            if (Files.exists(this.filePath) && !Files.isWritable(this.filePath)) {
+                LOGGER.log(Level.WARNING, "Subtitle file exists but is not writable: {0}. Disabling file output.", filePath);
+                this.enabled = false;
+                return;
+            }
+
+            // 4) Intentamos crear el fichero (CREATE + APPEND) para asegurarnos de que funciona
             Files.newOutputStream(this.filePath, StandardOpenOption.CREATE, StandardOpenOption.APPEND).close();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Unable to write to subtitle file {0}: {1}. Disabling file output.", new Object[]{this.filePath, e.getMessage()});
+            LOGGER.log(Level.WARNING,
+                "Unable to write to subtitle file {0}: {1}. Disabling file output.",
+                new Object[]{this.filePath, e.getMessage()});
             this.enabled = false;
         }
     }
@@ -65,10 +83,10 @@ public class SubtitleFileWriter {
         try {
             if (append) {
                 Files.writeString(filePath, text + System.lineSeparator(),
-                                   StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                                  StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } else {
                 Files.writeString(filePath, text,
-                                   StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                                  StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to write subtitle file", e);
