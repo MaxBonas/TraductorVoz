@@ -33,11 +33,25 @@ mvn package
 Run the application using Maven:
 
 ```bash
-mvn exec:java -Dexec.mainClass=traductor.Main
+mvn exec:java -Dexec.mainClass=traductor.Main -Dexec.jvmArgs="--enable-native-access=ALL-UNNAMED"
 ```
 
 The first time you run it, you will be asked for your Azure Speech credentials
 if the environment variables are not already set.
+
+## JDK 22+ Native Access
+
+From JDK 22 onwards the Microsoft Speech SDK requires explicit native access
+permission. When launching on JDK 22 or later, add
+`--enable-native-access=ALL-UNNAMED` to the JVM arguments or enable the
+equivalent option in your IDE.
+
+Example:
+
+```bash
+mvn exec:java -Dexec.mainClass=traductor.Main \
+  -Dexec.jvmArgs="--enable-native-access=ALL-UNNAMED"
+```
 
 
 ## Running Tests
