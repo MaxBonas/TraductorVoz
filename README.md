@@ -16,10 +16,9 @@ export AZURE_SPEECH_KEY=<your-key>
 export AZURE_SPEECH_REGION=<your-region>
 ```
 
-Alternatively you can use the `run.sh` script provided in this repository. It
-prompts for the key and region the first time and stores them in `.traductor.env`
-so subsequent runs reuse the saved values. Delete or edit this file if your
-credentials change.
+If these variables are not defined when the application starts, it will prompt
+for the key and region and store them in a local `.traductor.env` file for
+future runs. Delete or edit this file if your credentials change.
 
 `SpeechConfigProvider` reads these variables when creating the SDK configuration.
 
@@ -31,17 +30,14 @@ Compile the project using Maven:
 mvn package
 ```
 
-Run the application using the helper script which stores your credentials in
-`.traductor.env` the first time you run it:
+Run the application using Maven:
 
 ```bash
-./run.sh
+mvn exec:java -Dexec.mainClass=traductor.Main
 ```
 
-If you run the script from a file explorer on Windows, a new console window may
-open and close immediately after execution, hiding any errors. Instead, open a
-terminal (for example *Git Bash*) and launch `./run.sh` from there so the
-output remains visible.
+The first time you run it, you will be asked for your Azure Speech credentials
+if the environment variables are not already set.
 
 
 ## Running Tests
@@ -52,7 +48,7 @@ Execute unit tests using Maven:
 mvn test
 ```
 
-Launch the UI using Maven (the `run.sh` script does this automatically):
+Launch the UI using Maven:
 
 ```bash
 mvn exec:java -Dexec.mainClass=traductor.Main
