@@ -2,6 +2,8 @@ package traductor;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,7 +64,15 @@ public class TranslatorAppView extends JFrame implements TranslationListener {
 
                 setContentPane(bgPanel);
                 getRootPane().setOpaque(false);
-	}
+
+                setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosing(WindowEvent e) {
+                                translatorService.stopTranslation();
+                        }
+                });
+        }
 
 	private void restartClearTimer() {
 		if (clearTimer != null && clearTimer.isRunning())
